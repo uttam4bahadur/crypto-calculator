@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <title>Auto Buying Price ক্যালকুলেটর</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: 30px auto; }
+    .entry { display: flex; gap: 10px; margin-bottom: 10px; }
+    .entry input { flex: 1; padding: 8px; }
+    button { padding: 10px; margin-top: 10px; }
+    .result { margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <h2>Auto Buying Price ক্যালকুলেটর</h2>
+
+  <div id="investmentContainer">
+    <div class="entry">
+      <input type="number" placeholder="প্রথম ক্রয়মূল্য" class="price">
+      <input type="number" placeholder="ইনভেস্টমেন্ট (৳)" class="amount">
+    </div>
+  </div>
+
+  <button onclick="addInvestment()">আরো ইনভেস্টমেন্ট যোগ করুন (4% কম প্রাইস)</button>
+
+  <br><br>
+  <input type="number" id="profitPercent" placeholder="লাভের হার (%)">
+  <button onclick="calculate()">হিসাব করুন</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    function addInvestment() {
+      const container = document.getElementById('investmentContainer');
+      const entries = container.querySelectorAll('.entry');
+      const lastPriceInput = entries[entries.length - 1].querySelector('.price');
+      const lastPrice = parseFloat(lastPriceInput.value);
+
+      if (isNaN(lastPrice)) {
+        alert("আগের প্রাইস সঠিকভাবে ইনপুট দিন");
+        return;
+      }
+
+      const newPrice = (lastPrice * 0.96).toFixed(2); // 4% কম
+
+      const entry = document.createElement('div');
+      entry.className = 'entry';
+      entry.innerHTML = `
+        <input type="number" class="price" value="${newPrice}" readonly>
+        <input type="number" placeholder="ইনভেস্টমেন্ট (৳)" class="amount">
+      `;
+      container.appendChild(entry);
+    }
+
+    function calculate() {
+      const prices = document.querySelectorAll('.price');
+      const amounts = document.querySelectorAll('.amount');
+      const profitPercent = parseFloat(document.getElementById('profitPercent').value);
+
+      let totalInvestment = 0;
+      let totalQuantity = 0;
+
+      for (let i = 0; i < prices.length; i++) {
+        const price = parseFloat(prices[i].value);
+        const amount = parseFloat(amounts[i].value);
+
+        if (!isNaN(price) && !isNaN(amount)) {
+          totalInvestment += amount;
+          totalQuantity += (amount / price);
+        }
+      }
+
+      if (totalInvestment === 0 || totalQuantity === 0 || isNaN(profitPercent)) {
+        document.getElementById('result').textContent = "অনুগ্রহ করে সব ইনপুট দিন।";
+        return;
+      }
+
+      const avgBuyPrice = totalInvestment / totalQuantity;
+      const sellPrice = avgBuyPrice * (1 + profitPercent / 100);
+      const totalSell = sellPrice * totalQuantity;
+      const profit = totalSell - totalInvestment;
+
+      document.getElementById('result').innerHTML = `
+        মোট ইনভেস্টমেন্ট: ${totalInvestment.toFixed(2)} টাকা<br>
+        গড় ক্রয়মূল্য: ${avgBuyPrice.toFixed(2)}<br>
+        নির্ধারিত লাভ: ${profitPercent}%<br>
+        বিক্রয়মূল্য (প্রতি ইউনিট): ${sellPrice.toFixed(2)}<br>
+        মোট বিক্রয়: ${totalSell.toFixed(2)} টাকা<br>
+        মোট লাভ: ${profit.toFixed(2)} টাকা
+      `;
+    }
+  </script>
+
+</body>
+</html>
